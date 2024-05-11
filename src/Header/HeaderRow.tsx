@@ -32,7 +32,11 @@ const HeaderRow = <RecordType extends any>(props: RowProps<RecordType>) => {
     onHeaderRow,
     index,
   } = props;
-  const { prefixCls, direction } = useContext(TableContext, ['prefixCls', 'direction']);
+  const { prefixCls, direction, supportSticky } = useContext(TableContext, [
+    'prefixCls',
+    'direction',
+    'supportSticky',
+  ]);
   let rowProps: React.HTMLAttributes<HTMLElement>;
   if (onHeaderRow) {
     rowProps = onHeaderRow(
@@ -59,12 +63,13 @@ const HeaderRow = <RecordType extends any>(props: RowProps<RecordType>) => {
         if (column && column.onHeaderCell) {
           additionalProps = cell.column.onHeaderCell(column);
         }
-
+        const isFixLeft = typeof fixedInfo.fixLeft === 'number' && supportSticky;
+        const isFixRight = typeof fixedInfo.fixRight === 'number' && supportSticky;
         // If scrollbar cell is not fixed right, and the previous cell of the scrollbar is resizable, then the scrollbar is resizable
         const isScrollBarCellAndResizable =
           column.scrollbar &&
           // if scrollbar fixed right, the resize handle of previous cell is on the left, so there is no need to put the handle inside the scrollbar
-          column.fixed !== 'right' &&
+          (direction === 'rtl' ? !isFixLeft : !isFixRight) &&
           (cells[cells.length - 2].column as ColumnType<RecordType>).resizable;
 
         // Whether this cell is in the previous cell of the scrollbar
@@ -72,8 +77,10 @@ const HeaderRow = <RecordType extends any>(props: RowProps<RecordType>) => {
           cells[cells.length - 1].column.scrollbar && cellIndex === cells.length - 2;
 
         let resizable: boolean;
+        // ltr 如果是 scrollbar 前一列，如果 fixed right 则需要 resizable，如果没有 fixed，不需要 resizable
+        // rtl 如果是 scrollbar 前一列，如果 fixed left 则需要 resizable，
         if (isScrollBarPreviousCell) {
-          if (column.fixed === 'right') {
+          if (direction === 'rtl' ? isFixLeft : isFixRight) {
             resizable = (column as ColumnType<RecordType>).resizable;
           } else {
             resizable = false;
@@ -99,6 +106,8 @@ const HeaderRow = <RecordType extends any>(props: RowProps<RecordType>) => {
                 ? columnsKey[columnsKey.length - 2]
                 : columnsKey[cellIndex]
             }
+            isFixLeft={isFixLeft}
+            isFixRight={isFixRight}
             resizable={resizable}
             minWidth={(column as ColumnType<RecordType>).minWidth}
           />

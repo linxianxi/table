@@ -73,7 +73,7 @@
     &-resize-handle {
       position: absolute;
       top: 0;
-      right: 0;
+      inset-inline-end: 0;
       width: 4px;
       height: 100%;
       cursor: col-resize;
@@ -91,9 +91,12 @@
       z-index: 2;
     }
 
+    &-fix-left &-resize-handle {
+      right: 0
+    }
 
     &-fix-right &-resize-handle {
-      left: 0;
+      left: 0
     }
 
     &-fix-left,

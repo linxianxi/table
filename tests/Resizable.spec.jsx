@@ -275,7 +275,7 @@ describe('Table.resizable', () => {
     expect(wrapper.find('colgroup col').at(1).props().style.width).toBe(800);
   });
 
-  it('resize handle should in header right scrollbar', async () => {
+  it('resize handle should in header right scrollbar when last column is not fixed', async () => {
     const App = () => {
       const columns = [
         { key: 'a', dataIndex: 'a', width: 800, resizable: true },

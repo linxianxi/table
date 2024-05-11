@@ -6,12 +6,14 @@ import { createPortal } from 'react-dom';
 
 export default function useCelResize(
   columnKey: React.Key,
+  isFixLeft: boolean,
   isFixRight: boolean,
   cellPrefixCls: string,
   resizable?: boolean,
   minWidth: number = 0,
 ) {
   const {
+    direction,
     colsWidths,
     colsKeys,
     colWidths,
@@ -21,6 +23,7 @@ export default function useCelResize(
     onColumnResizeComplete,
     onResizingChange,
   } = useContext(TableContext, [
+    'direction',
     'colWidths',
     'colsKeys',
     'colsWidths',
@@ -38,6 +41,9 @@ export default function useCelResize(
   const mouseMoveRef = useRef<(event: MouseEvent) => void>(null);
   const mouseUpRef = useRef<(event: MouseEvent) => void>(null);
 
+  // handle position
+  const isRightHandle = direction === 'rtl' ? isFixLeft : !isFixRight;
+
   const removeResizeListener = () => {
     document.body.removeEventListener('mousemove', mouseMoveRef.current);
     document.body.removeEventListener('mouseup', mouseUpRef.current);
@@ -48,14 +54,14 @@ export default function useCelResize(
   const onResize = useEvent((event: MouseEvent, isResizeEnd?: boolean) => {
     const offset = event.pageX - startPageX.current;
     const oldWidth = colsWidths.get(columnKey);
-    let newWidth = startRealWidth.current + (isFixRight ? -offset : offset);
+    let newWidth = startRealWidth.current + (isRightHandle ? offset : -offset);
 
     if (newWidth < minWidth) {
       newWidth = minWidth;
     }
     setLineLeft(
       lineStartLeftRef.current +
-        (isFixRight ? startRealWidth.current - newWidth : newWidth - startRealWidth.current),
+        (isRightHandle ? newWidth - startRealWidth.current : startRealWidth.current - newWidth),
     );
 
     if (isResizeEnd) {
@@ -96,7 +102,7 @@ export default function useCelResize(
     event.preventDefault();
     const left =
       (event.target as HTMLElement).parentElement.getBoundingClientRect()[
-        isFixRight ? 'left' : 'right'
+        isRightHandle ? 'right' : 'left'
       ] - fullTableRef.current.getBoundingClientRect().left;
     setLineLeft(left);
     lineStartLeftRef.current = left;
