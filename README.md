@@ -129,9 +129,11 @@ React.render(<Table columns={columns} data={data} />, mountNode);
 | title | React Node |  | title of this column |
 | dataIndex | String |  | display field of the data record |
 | width | String \| Number |  | width of the specific proportion calculation according to the width of the columns |
+| minWidth | Number |  | min width of the specific proportion calculation according to the width of the columns |
 | fixed | String \| Boolean |  | this column will be fixed when table scroll horizontally: true or 'left' or 'right' |
 | align | String |  | specify how cell content is aligned |
 | ellipsis | Boolean |  | specify whether cell content be ellipsized |
+| resizable | Boolean |  | column resize |
 | rowScope | 'row' \| 'rowgroup' |  | Set scope attribute for all cells in this column |
 | onCell | Function(record, index) |  | Set custom props per each cell. |
 | onHeaderCell | Function(record) |  | Set custom props per each header cell. |

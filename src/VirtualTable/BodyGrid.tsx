@@ -24,7 +24,7 @@ const Grid = React.forwardRef<GridRef, GridProps>((props, ref) => {
 
   const {
     flattenColumns,
-    onColumnResize,
+    onColumnWidthChange,
     getRowKey,
     expandedKeys,
     prefixCls,
@@ -33,7 +33,7 @@ const Grid = React.forwardRef<GridRef, GridProps>((props, ref) => {
     scrollX,
   } = useContext(TableContext, [
     'flattenColumns',
-    'onColumnResize',
+    'onColumnWidthChange',
     'getRowKey',
     'prefixCls',
     'expandedKeys',
@@ -71,7 +71,7 @@ const Grid = React.forwardRef<GridRef, GridProps>((props, ref) => {
 
   React.useEffect(() => {
     columnsWidth.forEach(([key, width]) => {
-      onColumnResize(key, width);
+      onColumnWidthChange(key, width);
     });
   }, [columnsWidth]);
 

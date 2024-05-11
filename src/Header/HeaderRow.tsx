@@ -1,5 +1,4 @@
 import * as React from 'react';
-import Cell from '../Cell';
 import TableContext from '../context/TableContext';
 import { useContext } from '@rc-component/context';
 import type {
@@ -11,9 +10,10 @@ import type {
 } from '../interface';
 import { getCellFixedInfo } from '../utils/fixUtil';
 import { getColumnsKey } from '../utils/valueUtil';
+import HeaderCell from './HeaderCell';
 
 export interface RowProps<RecordType> {
-  cells: readonly CellType<RecordType>[];
+  cells: CellType<RecordType>[];
   stickyOffsets: StickyOffsets;
   flattenColumns: readonly ColumnType<RecordType>[];
   rowComponent: CustomizeComponent;
@@ -60,8 +60,29 @@ const HeaderRow = <RecordType extends any>(props: RowProps<RecordType>) => {
           additionalProps = cell.column.onHeaderCell(column);
         }
 
+        // If the cell is the previous cell of the scrollbar and resizable, and fixed is not right, then the scrollbar is resizable
+        const isScrollBarCellAndResizable =
+          column.scrollbar &&
+          (cells[cells.length - 2].column as ColumnType<RecordType>).resizable &&
+          cells[cells.length - 2].column.fixed !== 'right';
+
+        // Whether this cell is in the previous cell of the scrollbar
+        const isScrollBarCellPreviousCell =
+          cells[cells.length - 1].column.scrollbar && cellIndex === cells.length - 2;
+
+        let resizable: boolean;
+        if (isScrollBarCellPreviousCell) {
+          if (column.fixed === 'right') {
+            resizable = (column as ColumnType<RecordType>).resizable;
+          } else {
+            resizable = false;
+          }
+        } else {
+          resizable = isScrollBarCellAndResizable || (column as ColumnType<RecordType>).resizable;
+        }
+
         return (
-          <Cell
+          <HeaderCell
             {...cell}
             scope={column.title ? (cell.colSpan > 1 ? 'colgroup' : 'col') : null}
             ellipsis={column.ellipsis}
@@ -72,6 +93,13 @@ const HeaderRow = <RecordType extends any>(props: RowProps<RecordType>) => {
             {...fixedInfo}
             additionalProps={additionalProps}
             rowType="header"
+            columnKey={
+              isScrollBarCellAndResizable
+                ? columnsKey[columnsKey.length - 2]
+                : columnsKey[cellIndex]
+            }
+            resizable={resizable}
+            minWidth={(column as ColumnType<RecordType>).minWidth}
           />
         );
       })}

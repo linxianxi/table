@@ -116,7 +116,6 @@ function Cell<RecordType>(props: CellProps<RecordType>) {
     additionalProps = {},
     isSticky,
   } = props;
-
   const cellPrefixCls = `${prefixCls}-cell`;
   const { supportSticky, allColumnsFixedLeft, rowHoverable } = useContext(TableContext, [
     'supportSticky',
