@@ -274,4 +274,62 @@ describe('Table.resizable', () => {
     expect(wrapper.find('colgroup col').at(0).props().style.width).toBe(400);
     expect(wrapper.find('colgroup col').at(1).props().style.width).toBe(800);
   });
+
+  it('resize handle should in header right scrollbar', async () => {
+    const App = () => {
+      const columns = [
+        { key: 'a', dataIndex: 'a', width: 800, resizable: true },
+        { key: 'b', dataIndex: 'b', width: 800, resizable: true },
+      ];
+
+      return (
+        <Table
+          data={[{ a: '123', b: '123', key: '1' }]}
+          columns={columns}
+          scroll={{ x: 1600, y: 100 }}
+        />
+      );
+    };
+    const wrapper = mount(<App />);
+
+    expect(
+      wrapper.find('.rc-table-cell-scrollbar .rc-table-cell-resize-handle').exists(),
+    ).toBeTruthy();
+    expect(
+      wrapper
+        .find('.rc-table-thead .rc-table-cell')
+        .at(1)
+        .find('.rc-table-cell-resize-handle')
+        .exists(),
+    ).toBeFalsy();
+  });
+
+  it('resize handle should not in header right scrollbar when last column is fixed right', async () => {
+    const App = () => {
+      const columns = [
+        { key: 'a', dataIndex: 'a', width: 800, resizable: true },
+        { key: 'b', dataIndex: 'b', width: 800, resizable: true, fixed: 'right' },
+      ];
+
+      return (
+        <Table
+          data={[{ a: '123', b: '123', key: '1' }]}
+          columns={columns}
+          scroll={{ x: 1600, y: 100 }}
+        />
+      );
+    };
+    const wrapper = mount(<App />);
+
+    expect(
+      wrapper.find('.rc-table-cell-scrollbar .rc-table-cell-resize-handle').exists(),
+    ).toBeFalsy();
+    expect(
+      wrapper
+        .find('.rc-table-thead .rc-table-cell')
+        .at(1)
+        .find('.rc-table-cell-resize-handle')
+        .exists(),
+    ).toBeTruthy();
+  });
 });
