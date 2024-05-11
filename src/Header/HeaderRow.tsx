@@ -60,18 +60,19 @@ const HeaderRow = <RecordType extends any>(props: RowProps<RecordType>) => {
           additionalProps = cell.column.onHeaderCell(column);
         }
 
-        // If the cell is the previous cell of the scrollbar and resizable, and fixed is not right, then the scrollbar is resizable
+        // If scrollbar cell is not fixed right, and the previous cell of the scrollbar is resizable, then the scrollbar is resizable
         const isScrollBarCellAndResizable =
           column.scrollbar &&
-          (cells[cells.length - 2].column as ColumnType<RecordType>).resizable &&
-          cells[cells.length - 2].column.fixed !== 'right';
+          // if scrollbar fixed right, the resize handle of previous cell is on the left, so there is no need to put the handle inside the scrollbar
+          column.fixed !== 'right' &&
+          (cells[cells.length - 2].column as ColumnType<RecordType>).resizable;
 
         // Whether this cell is in the previous cell of the scrollbar
-        const isScrollBarCellPreviousCell =
+        const isScrollBarPreviousCell =
           cells[cells.length - 1].column.scrollbar && cellIndex === cells.length - 2;
 
         let resizable: boolean;
-        if (isScrollBarCellPreviousCell) {
+        if (isScrollBarPreviousCell) {
           if (column.fixed === 'right') {
             resizable = (column as ColumnType<RecordType>).resizable;
           } else {
