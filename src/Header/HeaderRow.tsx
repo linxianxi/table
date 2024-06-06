@@ -77,8 +77,8 @@ const HeaderRow = <RecordType extends any>(props: RowProps<RecordType>) => {
           cells[cells.length - 1].column.scrollbar && cellIndex === cells.length - 2;
 
         let resizable: boolean;
-        // ltr 如果是 scrollbar 前一列，如果 fixed right 则需要 resizable，如果没有 fixed，不需要 resizable
-        // rtl 如果是 scrollbar 前一列，如果 fixed left 则需要 resizable，
+        // ltr: If it is the column before the scrollbar and fixed right, resizable is required.
+        // rtl: If it is the column before the scrollbar and fixed left, resizable is required.
         if (isScrollBarPreviousCell) {
           if (direction === 'rtl' ? isFixLeft : isFixRight) {
             resizable = (column as ColumnType<RecordType>).resizable;
