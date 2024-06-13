@@ -193,6 +193,8 @@ function getDOM(node: any): HTMLElement | SVGElement | null {
     }
   }
 
+  console.log('getDOM instanceof', node, node instanceof HTMLElement);
+
   if (isDOM(node)) {
     console.log('getDOM 3');
     return node as any;
