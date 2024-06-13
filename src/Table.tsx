@@ -173,6 +173,34 @@ function defaultEmpty() {
   return 'No Data';
 }
 
+function isDOM(node: any): node is HTMLElement | SVGElement {
+  // https://developer.mozilla.org/en-US/docs/Web/API/Element
+  // Since XULElement is also subclass of Element, we only need HTMLElement and SVGElement
+  return node instanceof HTMLElement || node instanceof SVGElement;
+}
+
+/**
+ * Retrieves a DOM node via a ref, and does not invoke `findDOMNode`.
+ */
+function getDOM(node: any): HTMLElement | SVGElement | null {
+  if (node) {
+    if (typeof node === 'object') {
+      console.log('getDOM 1');
+      if (isDOM(node.nativeElement)) {
+        console.log('getDOM 2');
+        return node.nativeElement;
+      }
+    }
+  }
+
+  if (isDOM(node)) {
+    console.log('getDOM 3');
+    return node as any;
+  }
+  console.log('getDOM 4');
+  return null;
+}
+
 function Table<RecordType extends DefaultRecordType>(
   tableProps: TableProps<RecordType>,
   ref: React.Ref<Reference>,
@@ -484,7 +512,7 @@ function Table<RecordType extends DefaultRecordType>(
   const triggerOnScroll = () => {
     if (horizonScroll && scrollBodyRef.current) {
       onInternalScroll({
-        currentTarget: (scrollBodyRef.current as any).nativeElement || scrollBodyRef.current,
+        currentTarget: getDOM(scrollBodyRef.current),
       } as React.UIEvent<HTMLDivElement>);
     } else {
       setPingedLeft(false);
