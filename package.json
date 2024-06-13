@@ -1,6 +1,6 @@
 {
-  "name": "rc-table",
-  "version": "7.46.2",
+  "name": "rc-table-test-image-diff",
+  "version": "1.0.1",
   "description": "table ui component for react",
   "engines": {
     "node": ">=8.x"
