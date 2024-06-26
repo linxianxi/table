@@ -4,7 +4,7 @@ import { useEvent } from 'rc-util';
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
-export default function useCelResize(
+export default function useCellResize(
   columnKey: React.Key,
   isFixLeft: boolean,
   isFixRight: boolean,
