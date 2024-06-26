@@ -13,7 +13,7 @@ import getValue from 'rc-util/lib/utils/get';
 const renderBody: CustomizeScrollBody<any> = (rawData, props) => {
   const { ref, onScroll } = props;
 
-  return <Grid ref={ref} data={rawData as any} onScroll={onScroll} />;
+  return <Grid ref={ref as any} data={rawData as any} onScroll={onScroll} />;
 };
 
 export interface VirtualTableProps<RecordType> extends Omit<TableProps<RecordType>, 'scroll'> {
@@ -26,6 +26,7 @@ export interface VirtualTableProps<RecordType> extends Omit<TableProps<RecordTyp
 
 function VirtualTable<RecordType>(props: VirtualTableProps<RecordType>, ref: React.Ref<Reference>) {
   const {
+    data,
     columns,
     scroll,
     sticky,
@@ -81,7 +82,8 @@ function VirtualTable<RecordType>(props: VirtualTableProps<RecordType>, ref: Rea
         }}
         components={{
           ...components,
-          body: renderBody,
+          // fix https://github.com/ant-design/ant-design/issues/48991
+          body: data?.length ? renderBody : undefined,
         }}
         columns={columns}
         internalHooks={INTERNAL_HOOKS}

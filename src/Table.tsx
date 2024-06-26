@@ -75,6 +75,7 @@ import StickyScrollBar from './stickyScrollBar';
 import Column from './sugar/Column';
 import ColumnGroup from './sugar/ColumnGroup';
 import { getColumnsKey, validateValue } from './utils/valueUtil';
+import { getDOM } from 'rc-util/lib/Dom/findDOMNode';
 
 export const DEFAULT_PREFIX = 'rc-table';
 
@@ -393,7 +394,7 @@ function Table<RecordType extends DefaultRecordType>(
 
   if (fixHeader) {
     scrollYStyle = {
-      overflowY: 'scroll',
+      overflowY: hasData ? 'scroll' : 'auto',
       maxHeight: scroll.y,
     };
   }
@@ -464,7 +465,9 @@ function Table<RecordType extends DefaultRecordType>(
 
       const measureTarget = currentTarget || scrollHeaderRef.current;
       if (measureTarget) {
-        const { scrollWidth, clientWidth } = measureTarget;
+        const scrollWidth =
+          typeof mergedScrollX === 'number' ? mergedScrollX : measureTarget.scrollWidth;
+        const clientWidth = measureTarget.clientWidth;
         // There is no space to scroll
         if (scrollWidth === clientWidth) {
           setPingedLeft(false);
@@ -489,7 +492,10 @@ function Table<RecordType extends DefaultRecordType>(
 
   const triggerOnScroll = () => {
     if (horizonScroll && scrollBodyRef.current) {
-      onInternalScroll({ currentTarget: scrollBodyRef.current } as React.UIEvent<HTMLDivElement>);
+      onInternalScroll({
+        currentTarget: getDOM(scrollBodyRef.current) as HTMLElement,
+        scrollLeft: scrollBodyRef.current?.scrollLeft,
+      });
     } else {
       setPingedLeft(false);
       setPingedRight(false);

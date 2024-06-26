@@ -1,8 +1,6 @@
 import { useContext } from '@rc-component/context';
-import classNames from 'classnames';
 import VirtualList, { type ListProps, type ListRef } from 'rc-virtual-list';
 import * as React from 'react';
-import Cell from '../Cell';
 import TableContext, { responseImmutable } from '../context/TableContext';
 import useFlattenRecords, { type FlattenData } from '../hooks/useFlattenRecords';
 import type { ColumnType, OnCustomizeScroll, ScrollConfig } from '../interface';
@@ -16,7 +14,8 @@ export interface GridProps<RecordType = any> {
 
 export interface GridRef {
   scrollLeft: number;
-  scrollTo?: (scrollConfig: ScrollConfig) => void;
+  nativeElement: HTMLDivElement;
+  scrollTo: (scrollConfig: ScrollConfig) => void;
 }
 
 const Grid = React.forwardRef<GridRef, GridProps>((props, ref) => {
@@ -29,7 +28,6 @@ const Grid = React.forwardRef<GridRef, GridProps>((props, ref) => {
     expandedKeys,
     prefixCls,
     childrenColumnName,
-    emptyNode,
     scrollX,
   } = useContext(TableContext, [
     'flattenColumns',
@@ -38,7 +36,6 @@ const Grid = React.forwardRef<GridRef, GridProps>((props, ref) => {
     'prefixCls',
     'expandedKeys',
     'childrenColumnName',
-    'emptyNode',
     'scrollX',
   ]);
   const {
@@ -81,6 +78,7 @@ const Grid = React.forwardRef<GridRef, GridProps>((props, ref) => {
       scrollTo: (config: ScrollConfig) => {
         listRef.current?.scrollTo(config);
       },
+      nativeElement: listRef.current?.nativeElement,
     } as unknown as GridRef;
 
     Object.defineProperty(obj, 'scrollLeft', {
@@ -206,22 +204,19 @@ const Grid = React.forwardRef<GridRef, GridProps>((props, ref) => {
 
   // default 'div' in rc-virtual-list
   const wrapperComponent = getComponent(['body', 'wrapper']);
-  const RowComponent = getComponent(['body', 'row'], 'div');
-  const cellComponent = getComponent(['body', 'cell'], 'div');
 
-  let bodyContent: React.ReactNode;
-  if (flattenData.length) {
-    // ========================== Sticky Scroll Bar ==========================
-    const horizontalScrollBarStyle: React.CSSProperties = {};
-    if (sticky) {
-      horizontalScrollBarStyle.position = 'sticky';
-      horizontalScrollBarStyle.bottom = 0;
-      if (typeof sticky === 'object' && sticky.offsetScroll) {
-        horizontalScrollBarStyle.bottom = sticky.offsetScroll;
-      }
+  // ========================== Sticky Scroll Bar ==========================
+  const horizontalScrollBarStyle: React.CSSProperties = {};
+  if (sticky) {
+    horizontalScrollBarStyle.position = 'sticky';
+    horizontalScrollBarStyle.bottom = 0;
+    if (typeof sticky === 'object' && sticky.offsetScroll) {
+      horizontalScrollBarStyle.bottom = sticky.offsetScroll;
     }
+  }
 
-    bodyContent = (
+  return (
+    <GridContext.Provider value={gridContext}>
       <VirtualList<FlattenData<any>>
         fullHeight={false}
         ref={listRef}
@@ -236,6 +231,7 @@ const Grid = React.forwardRef<GridRef, GridProps>((props, ref) => {
         scrollWidth={scrollX as number}
         onVirtualScroll={({ x }) => {
           onScroll({
+            currentTarget: listRef.current?.nativeElement,
             scrollLeft: x,
           });
         }}
@@ -244,21 +240,11 @@ const Grid = React.forwardRef<GridRef, GridProps>((props, ref) => {
       >
         {(item, index, itemProps) => {
           const rowKey = getRowKey(item.record, index);
-          return <BodyLine data={item} rowKey={rowKey} index={index} {...itemProps} />;
+          return <BodyLine data={item} rowKey={rowKey} index={index} style={itemProps.style} />;
         }}
       </VirtualList>
-    );
-  } else {
-    bodyContent = (
-      <RowComponent className={classNames(`${prefixCls}-placeholder`)}>
-        <Cell component={cellComponent} prefixCls={prefixCls}>
-          {emptyNode}
-        </Cell>
-      </RowComponent>
-    );
-  }
-
-  return <GridContext.Provider value={gridContext}>{bodyContent}</GridContext.Provider>;
+    </GridContext.Provider>
+  );
 });
 
 const ResponseGrid = responseImmutable(Grid);

@@ -33,6 +33,8 @@ vi.mock('rc-virtual-list', async () => {
 describe('Table.Virtual', () => {
   let scrollLeftCalled = false;
 
+  const setScrollLeft = vi.fn();
+
   beforeAll(() => {
     spyElementPrototypes(HTMLElement, {
       getBoundingClientRect: () => ({
@@ -43,13 +45,20 @@ describe('Table.Virtual', () => {
           scrollLeftCalled = true;
           return 100;
         },
-        set: () => {},
+        set: setScrollLeft as any,
+      },
+      clientWidth: {
+        get: () => 80,
+      },
+      scrollWidth: {
+        get: () => 100,
       },
     });
   });
 
   beforeEach(() => {
     scrollLeftCalled = false;
+    setScrollLeft.mockReset();
     global.scrollToConfig = null;
     vi.useFakeTimers();
     resetWarned();
@@ -202,6 +211,35 @@ describe('Table.Virtual', () => {
       deltaX: 10,
     });
     expect(scrollLeftCalled).toBeTruthy();
+  });
+
+  it('should not reset scroll when data changed', async () => {
+    const { container, rerender } = getTable();
+
+    resize(container.querySelector('.rc-table')!);
+
+    rerender(
+      <VirtualTable
+        columns={[
+          {
+            dataIndex: 'name',
+          },
+          {
+            dataIndex: 'age',
+          },
+          {
+            dataIndex: 'address',
+          },
+        ]}
+        rowKey="name"
+        scroll={{ x: 100, y: 100 }}
+        data={[{}]}
+      />,
+    );
+    vi.runAllTimers();
+
+    // mock scrollLeft is 100, but virtual offsetX is 0
+    expect(setScrollLeft).toHaveBeenCalledWith(undefined, 0);
   });
 
   it('should follow correct width', () => {
@@ -442,5 +480,84 @@ describe('Table.Virtual', () => {
 
     fireEvent.scroll(container.querySelector('.rc-table-tbody-virtual-holder')!);
     expect(onScroll).toHaveBeenCalled();
+  });
+
+  it('scrollable when empty', async () => {
+    const onScroll = vi.fn();
+    const { container } = getTable({ data: [], onScroll });
+
+    await waitFakeTimer();
+
+    fireEvent.scroll(container.querySelector('.rc-table-body'));
+    expect(onScroll).toHaveBeenCalled();
+  });
+
+  describe('shadow', () => {
+    beforeAll(() => {
+      spyElementPrototypes(HTMLElement, {
+        scrollLeft: {
+          get: () => 0,
+        },
+      });
+    });
+
+    it('right shadow should display correctly when mount', async () => {
+      const { container } = getTable({
+        columns: [
+          {
+            dataIndex: 'name',
+            width: 30,
+          },
+          {
+            dataIndex: 'age',
+            width: 30,
+          },
+          {
+            dataIndex: 'address',
+            width: 40,
+            fixed: 'right',
+          },
+        ],
+        getContainerWidth: () => 80,
+      });
+
+      resize(container.querySelector('.rc-table'));
+
+      await waitFakeTimer();
+
+      expect(
+        container.querySelector('.rc-table').classList.contains('rc-table-ping-right'),
+      ).toBeTruthy();
+    });
+
+    it('right shadow should display correctly when showHeader is false', async () => {
+      const { container } = getTable({
+        showHeader: false,
+        columns: [
+          {
+            dataIndex: 'name',
+            width: 30,
+          },
+          {
+            dataIndex: 'age',
+            width: 30,
+          },
+          {
+            dataIndex: 'address',
+            width: 40,
+            fixed: 'right',
+          },
+        ],
+        getContainerWidth: () => 80,
+      });
+
+      resize(container.querySelector('.rc-table'));
+
+      await waitFakeTimer();
+
+      expect(
+        container.querySelector('.rc-table').classList.contains('rc-table-ping-right'),
+      ).toBeTruthy();
+    });
   });
 });
